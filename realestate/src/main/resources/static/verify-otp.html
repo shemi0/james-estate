@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email | James Estate</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f3f4f6; min-height: 100vh; display: flex; flex-direction: column; }
+        .navbar {
+            background: #fff; border-bottom: 1px solid #e5e7eb;
+            padding: 0 30px; height: 65px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: #c41e3a; text-decoration: none; }
+        .logo span { color: #1a1a1a; }
+        .container {
+            flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px;
+        }
+        .card {
+            background: white; border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            width: 100%; max-width: 420px; padding: 40px; text-align: center;
+        }
+        h1 { font-size: 24px; margin-bottom: 8px; color: #111; }
+        p { color: #6b7280; font-size: 14px; margin-bottom: 25px; }
+        input {
+            width: 100%; padding: 14px; border: 1px solid #d1d5db;
+            border-radius: 8px; font-size: 18px; text-align: center;
+            letter-spacing: 8px; margin-bottom: 20px;
+        }
+        input:focus {
+            outline: none; border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
+        button {
+            width: 100%; padding: 14px; background: #c41e3a; color: white;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+        }
+        button:hover { background: #a01830; }
+        .message {
+            margin-top: 16px; padding: 12px; border-radius: 8px;
+            font-size: 14px; display: none;
+        }
+        .success { background: #dcfce7; color: #15803d; }
+        .error { background: #fef2f2; color: #b91c1c; }
+        .email-display { font-weight: 600; color: #111; }
+    </style>
+<link rel="stylesheet" href="market.css">
+</head>
+<body class="market">
+<nav class="navbar">
+    <a href="index.html" class="logo">James <span>Estate</span></a>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h1>Verify Your Email</h1>
+        <p>We sent a verification link and a 6-digit code to<br><span class="email-display" id="emailDisplay"></span></p>
+
+        <input type="text" id="otp" maxlength="6" placeholder="000000" autocomplete="off">
+
+        <button onclick="verifyOtp()">Verify Code</button>
+        <button id="resendBtn" onclick="resendCode()" style="margin-top:10px;background:#fff;color:#0b63ce;border:1px solid #0b63ce;">Resend code</button>
+
+        <div id="message" class="message"></div>
+    </div>
+</div>
+
+<script>
+    // Get email from URL or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    let email = urlParams.get('email') || localStorage.getItem('pendingEmail');
+
+    if (!email) {
+        window.location.href = 'register.html';
+    }
+
+    document.getElementById('emailDisplay').innerText = email;
+    if (urlParams.get('mail') === 'failed') {
+        showMessage('The first email did not go out. Click Resend code.', 'error');
+    }
+
+    const codeFromLink = urlParams.get('code') || urlParams.get('otp');
+    if (codeFromLink) {
+        document.getElementById('otp').value = codeFromLink;
+        verifyOtp();
+    }
+
+    async function verifyOtp() {
+        const otp = document.getElementById('otp').value.trim();
+        const messageDiv = document.getElementById('message');
+
+        if (otp.length !== 6) {
+            showMessage('Please enter the 6-digit code', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:8080/api/users/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                showMessage(data.message, 'success');
+                localStorage.removeItem('pendingEmail');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } else {
+                showMessage(data.message || 'Verification failed', 'error');
+            }
+        } catch (err) {
+            showMessage('Server error. Please try again.', 'error');
+        }
+    }
+
+    async function resendCode() {
+        const button = document.getElementById('resendBtn');
+        button.disabled = true;
+        button.innerText = 'Sending...';
+        try {
+            const res = await fetch('http://localhost:8080/api/users/resend-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            showMessage(data.message || 'Could not resend the code', data.success ? 'success' : 'error');
+        } catch (err) {
+            showMessage('Server error. Please try again.', 'error');
+        }
+        button.disabled = false;
+        button.innerText = 'Resend code';
+    }
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+        messageDiv.innerText = text;
+    }
+
+    // Allow Enter key
+    document.getElementById('otp').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') verifyOtp();
+    });
+</script>
+</body>
+</html>

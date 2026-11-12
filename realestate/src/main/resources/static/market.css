@@ -1,0 +1,450 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
+
+:root {
+    --ink: #1b2430;
+    --muted: #5d6b7c;
+    --cream: #f5f7fb;
+    --paper: #ffffff;
+    --white: #ffffff;
+    --line: #e4eaf1;
+    --gold: #0b63ce;
+    --wine: #0b63ce;
+    --wine-dark: #084eaa;
+}
+
+body.market {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: Outfit, "Segoe UI", sans-serif;
+}
+
+body.market,
+body.market h1,
+body.market h2,
+body.market h3,
+body.market .logo {
+    font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+body.market .navbar {
+    height: 78px;
+    padding: 0 48px;
+    background: rgba(251, 248, 244, 0.92);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+}
+
+body.market .logo {
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    font-weight: 600;
+}
+
+body.market .logo span {
+    color: var(--wine);
+}
+
+body.market .nav-links a,
+body.market .nav-right a,
+body.market .btn-login {
+    color: var(--ink);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+body.market .nav-links a:hover {
+    color: var(--wine);
+}
+
+body.market .btn-outline,
+body.market .btn-primary,
+body.market .btn-login,
+body.market .logout-btn,
+body.market .submit-btn,
+body.market .login-btn,
+body.market .register-btn {
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+body.market .btn-outline,
+body.market .btn-login {
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+}
+
+body.market .btn-primary,
+body.market .submit-btn,
+body.market .login-btn,
+body.market .register-btn,
+body.market .contact-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+}
+
+body.market .btn-primary:hover,
+body.market .submit-btn:hover,
+body.market .login-btn:hover,
+body.market .register-btn:hover {
+    background: var(--wine);
+}
+
+.home-hero {
+    min-height: 88vh;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.home-copy {
+    padding: 88px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+}
+
+.home-copy h1 {
+    font-size: 76px;
+    line-height: 0.92;
+    font-weight: 500;
+    max-width: 640px;
+}
+
+.home-copy p {
+    margin-top: 22px;
+    max-width: 460px;
+    color: #ddd4c8;
+    font-weight: 300;
+    font-size: 18px;
+}
+
+.home-search {
+    margin-top: 36px;
+    display: flex;
+    background: var(--paper);
+    border-radius: 999px;
+    overflow: hidden;
+    max-width: 560px;
+}
+
+.home-search input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 18px 24px;
+    font-size: 15px;
+    color: var(--ink);
+    font-family: inherit;
+}
+
+.home-search input:focus {
+    outline: none;
+}
+
+.home-search button {
+    border: none;
+    background: var(--wine);
+    color: white;
+    padding: 0 28px;
+    font-family: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.home-visual {
+    background:
+        linear-gradient(180deg, rgba(23, 20, 16, 0.05), rgba(23, 20, 16, 0.45)),
+        url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80') center/cover;
+}
+
+.market-section {
+    padding: 72px 48px 40px;
+}
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+}
+
+.section-head h2 {
+    font-size: 48px;
+    font-weight: 500;
+}
+
+.section-head a {
+    color: var(--wine);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.listing-card {
+    background: var(--white);
+    text-decoration: none;
+    color: inherit;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    display: block;
+}
+
+.listing-card img,
+.listing-card .empty-photo {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    background: #e7e1d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+}
+
+.listing-body {
+    padding: 18px 18px 22px;
+}
+
+.listing-body h3 {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.listing-price {
+    margin-top: 8px;
+    color: var(--wine);
+    font-weight: 600;
+}
+
+.listing-meta {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.lanes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 10px 48px 64px;
+}
+
+.lane {
+    background: var(--ink);
+    color: var(--paper);
+    min-height: 180px;
+    border-radius: 18px;
+    padding: 28px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.lane span {
+    color: var(--gold);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.lane strong {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 36px;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding: 20px 48px 80px;
+    align-items: center;
+}
+
+.steps h2 {
+    font-size: 52px;
+    font-weight: 500;
+    line-height: 0.95;
+}
+
+.step {
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+}
+
+.step b {
+    display: block;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 26px;
+    font-weight: 500;
+}
+
+.step p {
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.site-footer {
+    background: var(--ink);
+    color: #d9d0c5;
+    padding: 36px 48px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 14px;
+}
+
+.site-footer a {
+    color: white;
+    text-decoration: none;
+    margin-right: 18px;
+}
+
+body.market #sidebar {
+    background: var(--cream);
+    border-right: 1px solid var(--line);
+}
+
+body.market .filters input,
+body.market .filters select,
+body.market .form-group input,
+body.market .form-group select,
+body.market .form-group textarea,
+body.market .login-card input,
+body.market .register-card input,
+body.market .card input {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--white);
+    font-family: inherit;
+}
+
+body.market .property-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 0 0 14px;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+body.market .property-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(23, 20, 16, 0.08);
+}
+
+body.market .card-photo {
+    height: 168px;
+    border-radius: 0;
+    margin: 0 0 12px;
+}
+
+body.market .property-card h3,
+body.market .property-card .price,
+body.market .property-card .location,
+body.market .property-card .badges {
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+body.market .property-card h3 {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+body.market .map-open {
+    display: inline-block;
+    margin: 10px 14px 0;
+    color: #0b63ce;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+body.market .price {
+    color: var(--wine);
+}
+
+body.market .container,
+body.market .login-container,
+body.market .register-container {
+    background: transparent;
+}
+
+body.market .card,
+body.market .login-card,
+body.market .register-card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: none;
+}
+
+.market-note {
+    padding: 18px 16px 0;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+    .home-hero,
+    .market-grid,
+    .lanes,
+    .steps {
+        grid-template-columns: 1fr;
+    }
+
+    .home-copy {
+        padding: 48px 24px;
+    }
+
+    .home-copy h1,
+    .section-head h2,
+    .steps h2 {
+        font-size: 46px;
+    }
+
+    .home-visual {
+        min-height: 280px;
+    }
+
+    .market-section,
+    .lanes,
+    .steps,
+    .site-footer,
+    body.market .navbar {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}

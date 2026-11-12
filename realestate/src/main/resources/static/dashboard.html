@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent dashboard | James Estate</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/cesium@1.125/Build/Cesium/Widgets/widgets.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Source Sans 3", "Segoe UI", sans-serif; background: #f5f7fb; color: #1b2430; }
+        a { color: inherit; }
+        .topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: #fff; border-bottom: 1px solid #e6eaf0; position: sticky; top: 0; z-index: 20; }
+        .brand { font-size: 26px; font-weight: 700; text-decoration: none; color: #0b63ce; }
+        .actions { display: flex; gap: 12px; align-items: center; }
+        .ghost, .solid { border-radius: 8px; padding: 10px 16px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; text-decoration: none; font-family: inherit; }
+        .ghost { background: #fff; border: 1px solid #c9d3e0; color: #17304d; }
+        .solid { background: #0b63ce; color: #fff; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+        .card { background: #fff; border: 1px solid #e4eaf1; border-radius: 16px; padding: 22px; }
+        h2 { font-size: 28px; }
+        .sub { color: #5d6b7c; margin: 4px 0 16px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .full { grid-column: 1 / -1; }
+        label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; border: 1px solid #d7e0ea; border-radius: 10px; padding: 11px 12px; font: inherit; background: #fff; }
+        textarea { min-height: 90px; }
+        #pick-map { height: 360px; border-radius: 12px; overflow: hidden; margin-top: 8px; }
+        .row { display: flex; gap: 8px; margin-top: 16px; }
+        .message { display: none; margin-top: 12px; padding: 10px 12px; border-radius: 10px; }
+        .success { background: #e8f7ee; color: #146c36; }
+        .error { background: #fdecec; color: #a12626; }
+        .mine { grid-column: 1 / -1; }
+        .listing { display: grid; grid-template-columns: 160px 1fr auto; gap: 14px; border-top: 1px solid #e4eaf1; padding: 14px 0; align-items: center; }
+        .listing img, .ph { width: 160px; height: 110px; object-fit: cover; border-radius: 10px; background: #eef2f6; }
+        .ph { display: flex; align-items: center; justify-content: center; color: #66788c; font-size: 13px; }
+        .price { color: #0b63ce; font-weight: 700; }
+        .tools { display: flex; flex-direction: column; gap: 8px; }
+        .tools button, .tools label { border: 1px solid #c9d3e0; background: #fff; border-radius: 8px; padding: 8px 10px; font: inherit; font-weight: 700; cursor: pointer; text-align: center; }
+        .tools input { display: none; }
+        .danger { color: #a12626; }
+        @media (max-width: 860px) {
+            .wrap, .listing { grid-template-columns: 1fr; }
+            .topbar { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="index.html">James Estate</a>
+    <div class="actions">
+        <span id="agentName"></span>
+        <a class="ghost" href="properties.html">View map</a>
+        <button class="ghost" onclick="logout()">Log out</button>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="card">
+        <h2 id="formTitle">Add a listing</h2>
+        <p class="sub" id="formHelp">Click the satellite map to drop the pin on the real building.</p>
+        <div class="grid">
+            <div class="full"><label>Title</label><input id="title" placeholder="4 bedroom duplex in Lekki"></div>
+            <div class="full"><label>Description</label><textarea id="description"></textarea></div>
+            <div><label>Listing</label>
+                <select id="listingType">
+                    <option value="SALE">For sale</option>
+                    <option value="RENT">For rent</option>
+                    <option value="HOTEL">Short stay</option>
+                </select>
+            </div>
+            <div><label>Type</label><input id="propertyType" placeholder="House, apartment, land"></div>
+            <div><label>Price (₦)</label><input id="price" type="number"></div>
+            <div><label>Price type</label>
+                <select id="priceType">
+                    <option value="TOTAL">Total</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="NIGHTLY">Nightly</option>
+                </select>
+            </div>
+            <div><label>Address</label><input id="address"></div>
+            <div><label>City</label><input id="city"></div>
+            <div><label>State</label><input id="state"></div>
+            <div><label>Status</label>
+                <select id="status">
+                    <option value="AVAILABLE">Available</option>
+                    <option value="SOLD">Sold</option>
+                    <option value="RENTED">Rented</option>
+                </select>
+            </div>
+            <div><label>Title verified</label>
+                <select id="titleVerified"><option value="false">No</option><option value="true">Yes</option></select>
+            </div>
+            <div><label>Bedrooms</label><input id="bedrooms" type="number"></div>
+            <div><label>Bathrooms</label><input id="bathrooms" type="number"></div>
+            <div><label>Latitude</label><input id="latitude" type="number" step="any"></div>
+            <div><label>Longitude</label><input id="longitude" type="number" step="any"></div>
+            <div class="full"><label>Photos</label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple></div>
+        </div>
+        <div class="row">
+            <button class="solid" id="saveBtn" onclick="saveProperty()">Publish listing</button>
+            <button class="ghost" id="cancelBtn" onclick="resetForm()" style="display:none;">Cancel edit</button>
+        </div>
+        <div id="message" class="message"></div>
+    </section>
+
+    <section class="card">
+        <h2>Pin the building</h2>
+        <p class="sub">Click the roof or plot. The latitude and longitude fill in for you.</p>
+        <div id="pick-map"></div>
+    </section>
+
+    <section class="card mine">
+        <h2>Your listings</h2>
+        <p class="sub">Edit a listing, add photos, or remove it.</p>
+        <div id="mine">Loading your listings...</div>
+    </section>
+</main>
+
+<script>window.CESIUM_BASE_URL = "https://unpkg.com/cesium@1.125/Build/Cesium/";</script>
+<script src="https://unpkg.com/cesium@1.125/Build/Cesium/Cesium.js"></script>
+<script src="earth-view.js"></script>
+<script>
+    const agentId = localStorage.getItem("agentId");
+    const agentName = localStorage.getItem("agentName");
+    if (!agentId) window.location.href = "login.html";
+    document.getElementById("agentName").textContent = agentName || "Agent";
+
+    let editingId = null;
+    let pin = null;
+    const viewer = new Cesium.Viewer("pick-map", {
+        imageryProvider: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        animation: false,
+        timeline: false,
+        homeButton: false,
+        sceneModePicker: false,
+        navigationHelpButton: false,
+        fullscreenButton: false,
+        infoBox: false,
+        selectionIndicator: false,
+        terrainProvider: new Cesium.EllipsoidTerrainProvider()
+    });
+    addRealWorldLayers(viewer);
+    viewer.camera.setView({ destination: Cesium.Cartesian3.fromDegrees(3.3792, 6.5244, 25000) });
+
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    handler.setInputAction((click) => {
+        const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+        if (!cartesian) return;
+        const carto = Cesium.Cartographic.fromCartesian(cartesian);
+        const lat = Cesium.Math.toDegrees(carto.latitude);
+        const lng = Cesium.Math.toDegrees(carto.longitude);
+        document.getElementById("latitude").value = lat.toFixed(6);
+        document.getElementById("longitude").value = lng.toFixed(6);
+        dropPin(lng, lat);
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    function dropPin(lng, lat) {
+        if (pin) viewer.entities.remove(pin);
+        pin = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lng, lat),
+            point: {
+                pixelSize: 16,
+                color: Cesium.Color.fromCssColorString("#0b63ce"),
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            }
+        });
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+
+    function say(kind, text) {
+        const box = document.getElementById("message");
+        box.className = "message " + kind;
+        box.style.display = "block";
+        box.textContent = text;
+    }
+
+    function payload() {
+        return {
+            title: document.getElementById("title").value,
+            description: document.getElementById("description").value,
+            listingType: document.getElementById("listingType").value,
+            propertyType: document.getElementById("propertyType").value,
+            price: parseFloat(document.getElementById("price").value),
+            priceType: document.getElementById("priceType").value,
+            address: document.getElementById("address").value,
+            city: document.getElementById("city").value,
+            state: document.getElementById("state").value,
+            latitude: parseFloat(document.getElementById("latitude").value) || null,
+            longitude: parseFloat(document.getElementById("longitude").value) || null,
+            bedrooms: parseInt(document.getElementById("bedrooms").value, 10) || null,
+            bathrooms: parseInt(document.getElementById("bathrooms").value, 10) || null,
+            titleVerified: document.getElementById("titleVerified").value === "true",
+            status: document.getElementById("status").value,
+            agent: { id: agentId }
+        };
+    }
+
+    async function uploadPhotos(id) {
+        const photoInput = document.getElementById("photos");
+        if (!photoInput.files.length) return true;
+        const form = new FormData();
+        for (const file of photoInput.files) form.append("files", file);
+        const photoRes = await fetch("http://localhost:8080/api/properties/" + id + "/images", { method: "POST", body: form });
+        return photoRes.ok;
+    }
+
+    async function saveProperty() {
+        const body = JSON.stringify(payload());
+        const url = editingId
+            ? "http://localhost:8080/api/properties/" + editingId
+            : "http://localhost:8080/api/properties";
+        try {
+            const res = await fetch(url, {
+                method: editingId ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body
+            });
+            if (!res.ok) {
+                say("error", "Could not save the listing. Check the price and the pin.");
+                return;
+            }
+            const saved = await res.json();
+            const photosOk = await uploadPhotos(saved.id);
+            say(photosOk ? "success" : "error", photosOk ? "Listing saved." : "Listing saved, but the photos did not upload.");
+            resetForm();
+            loadMine();
+        } catch (err) {
+            say("error", "Server error. Is the backend running?");
+        }
+    }
+
+    function resetForm() {
+        editingId = null;
+        document.getElementById("formTitle").textContent = "Add a listing";
+        document.getElementById("saveBtn").textContent = "Publish listing";
+        document.getElementById("cancelBtn").style.display = "none";
+        document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+        document.getElementById("listingType").value = "SALE";
+        document.getElementById("priceType").value = "TOTAL";
+        document.getElementById("status").value = "AVAILABLE";
+        document.getElementById("titleVerified").value = "false";
+    }
+
+    function editListing(property) {
+        editingId = property.id;
+        document.getElementById("formTitle").textContent = "Edit listing";
+        document.getElementById("saveBtn").textContent = "Save changes";
+        document.getElementById("cancelBtn").style.display = "inline-block";
+        ["title", "description", "propertyType", "price", "address", "city", "state", "latitude", "longitude", "bedrooms", "bathrooms"].forEach(id => {
+            document.getElementById(id).value = property[id] ?? "";
+        });
+        document.getElementById("listingType").value = property.listingType || "SALE";
+        document.getElementById("priceType").value = property.priceType || "TOTAL";
+        document.getElementById("status").value = property.status || "AVAILABLE";
+        document.getElementById("titleVerified").value = property.titleVerified ? "true" : "false";
+        if (property.latitude && property.longitude) {
+            dropPin(property.longitude, property.latitude);
+            lookAtGround(viewer, property.longitude, property.latitude, 500);
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function removeListing(id) {
+        if (!confirm("Remove this listing?")) return;
+        const res = await fetch("http://localhost:8080/api/properties/" + id, { method: "DELETE" });
+        if (!res.ok) {
+            say("error", "Could not remove the listing.");
+            return;
+        }
+        if (editingId === id) resetForm();
+        say("success", "Listing removed.");
+        loadMine();
+    }
+
+    async function addPhotos(id, input) {
+        if (!input.files.length) return;
+        const form = new FormData();
+        for (const file of input.files) form.append("files", file);
+        const res = await fetch("http://localhost:8080/api/properties/" + id + "/images", { method: "POST", body: form });
+        say(res.ok ? "success" : "error", res.ok ? "Photos added." : "Photos could not be uploaded.");
+        if (res.ok) loadMine();
+    }
+
+    function esc(value) {
+        return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    async function loadMine() {
+        const box = document.getElementById("mine");
+        try {
+            const res = await fetch("http://localhost:8080/api/properties/agent/" + agentId);
+            const items = await res.json();
+            if (!items.length) {
+                box.innerHTML = "<p class='sub'>You have not published a listing yet.</p>";
+                return;
+            }
+            box.innerHTML = "";
+            items.forEach(property => {
+                const row = document.createElement("article");
+                row.className = "listing";
+                const photo = property.images && property.images.length
+                    ? `<img src="${esc(property.images[0].url)}" alt="">`
+                    : `<div class="ph">No photo</div>`;
+                row.innerHTML = `
+                    ${photo}
+                    <div>
+                        <strong>${esc(property.title)}</strong>
+                        <div class="price">₦${Number(property.price || 0).toLocaleString()}</div>
+                        <div>${esc([property.address, property.city].filter(Boolean).join(", "))}</div>
+                    </div>
+                    <div class="tools">
+                        <button type="button" data-edit>Edit</button>
+                        <label>Add photos<input type="file" accept="image/*" multiple data-photos></label>
+                        <button type="button" class="danger" data-delete>Delete</button>
+                    </div>`;
+                row.querySelector("[data-edit]").onclick = () => editListing(property);
+                row.querySelector("[data-delete]").onclick = () => removeListing(property.id);
+                row.querySelector("[data-photos]").onchange = (event) => addPhotos(property.id, event.target);
+                box.appendChild(row);
+            });
+        } catch (err) {
+            box.textContent = "Could not load your listings.";
+        }
+    }
+
+    loadMine();
+</script>
+</body>
+</html>

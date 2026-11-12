@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Login | James Estate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 30px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #c41e3a;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #1a1a1a;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 24px;
+        }
+
+        /* Login Card */
+        .login-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .login-card h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #111;
+        }
+
+        .login-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 18px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #c41e3a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #a01830;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+            text-align: center;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .footer-text a {
+            color: #c41e3a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+<link rel="stylesheet" href="market.css">
+</head>
+<body class="market">
+
+<nav class="navbar">
+    <a href="index.html" class="logo">James <span>Estate</span></a>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="properties.html">Browse Properties</a>
+    </div>
+</nav>
+
+<div class="login-container">
+    <div class="login-card">
+        <h1>Agent Login</h1>
+        <p>Access your dashboard to manage listings</p>
+
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com">
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password">
+
+        <button class="login-btn" onclick="login()">Log In</button>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="footer-text">
+            Don't have an account? <a href="register.html">Sign up</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const errorMsg = document.getElementById("errorMsg");
+
+        if (!email || !password) {
+            errorMsg.style.display = "block";
+            errorMsg.innerText = "Please enter email and password";
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:8080/api/users/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem("agentId", data.userId);
+                localStorage.setItem("agentName", data.fullName);
+                localStorage.setItem("agentEmail", data.email);
+                window.location.href = "dashboard.html";
+            } else {
+                errorMsg.style.display = "block";
+                errorMsg.innerText = data.message || "Login failed";
+            }
+        } catch (err) {
+            errorMsg.style.display = "block";
+            errorMsg.innerText = "Server error. Is the backend running?";
+        }
+    }
+
+    // Enter key support
+    document.getElementById("password").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") login();
+    });
+</script>
+</body>
+</html>

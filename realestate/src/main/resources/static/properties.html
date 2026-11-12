@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties | James Estate</title>
+    <link rel="stylesheet" href="https://unpkg.com/cesium@1.125/Build/Cesium/Widgets/widgets.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 30px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #c41e3a;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #1a1a1a;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #c41e3a;
+        }
+
+        .nav-right a {
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-login {
+            color: #1a1a1a;
+            border: 1px solid #d1d5db;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #c41e3a;
+            color: white;
+        }
+
+        /* Main Layout */
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filters {
+            padding: 18px;
+            border-bottom: 1px solid #f3f4f6;
+            background: #fafafa;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            padding: 11px 14px;
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
+
+        #property-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .property-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .property-card:hover {
+            border-color: #c41e3a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .card-photo {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #e5e7eb;
+            display: block;
+        }
+
+        .card-photo.placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .property-card h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #111;
+        }
+
+        .price {
+            font-size: 17px;
+            font-weight: 700;
+            color: #c41e3a;
+            margin-bottom: 6px;
+        }
+
+        .location {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .sale { background: #fee2e2; color: #b91c1c; }
+        .rent { background: #fef3c7; color: #b45309; }
+        .hotel { background: #f3e8ff; color: #7e22ce; }
+        .verified { background: #dcfce7; color: #15803d; }
+        .not-verified { background: #fee2e2; color: #b91c1c; }
+
+        /* Map */
+        #map-wrap {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        #map {
+            position: absolute;
+            inset: 0;
+        }
+
+        #place-search {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 2;
+            width: min(380px, calc(100% - 70px));
+        }
+
+        #placeInput {
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+            font-size: 14px;
+        }
+
+        #placeInput:focus {
+            outline: 2px solid #c41e3a;
+        }
+
+        #place-results {
+            margin-top: 6px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
+        }
+
+        #place-results button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: white;
+            border: none;
+            border-bottom: 1px solid #f3f4f6;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        #place-results button:hover {
+            background: #fef2f2;
+        }
+
+        #place-results strong {
+            display: block;
+            color: #111;
+        }
+
+        #place-results span {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        #map-modes {
+            position: absolute;
+            top: 62px;
+            left: 12px;
+            z-index: 2;
+            display: flex;
+            gap: 6px;
+        }
+
+        #map-modes button {
+            border: none;
+            background: white;
+            color: #111;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+        }
+
+        #map-modes button.active {
+            background: #c41e3a;
+            color: white;
+        }
+
+        #map .cesium-viewer,
+        #map .cesium-viewer-cesiumWidgetContainer,
+        #map .cesium-widget {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            #sidebar {
+                width: 100%;
+                height: 48%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            #map-wrap {
+                height: 52%;
+                flex: none;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="market.css">
+</head>
+<body class="market">
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a href="index.html" class="logo">James <span>Estate</span></a>
+
+    <ul class="nav-links">
+        <li><a href="properties.html">Buy</a></li>
+        <li><a href="properties.html?type=RENT">Rent</a></li>
+        <li><a href="properties.html?type=HOTEL">Short Stay</a></li>
+        <li><a href="login.html">For Agents</a></li>
+    </ul>
+
+    <div class="nav-right">
+        <a href="login.html" class="btn-login">Log in</a>
+        <a href="register.html" class="btn-primary">Agent Sign up</a>
+    </div>
+</nav>
+
+<div class="main">
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <div class="market-note">The marketplace</div>
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Search city, area or title...">
+
+            <select id="listingTypeFilter">
+                <option value="all">All Types</option>
+                <option value="SALE">For Sale</option>
+                <option value="RENT">For Rent</option>
+                <option value="HOTEL">Hotel / Short Stay</option>
+            </select>
+
+            <select id="verifiedFilter">
+                <option value="all">All Properties</option>
+                <option value="verified">Verified Only</option>
+                <option value="not-verified">Not Verified</option>
+            </select>
+        </div>
+
+        <div id="property-list">
+            Loading properties...
+        </div>
+    </div>
+
+    <!-- Map -->
+    <div id="map-wrap">
+        <div id="map"></div>
+        <form id="place-search" autocomplete="off">
+            <input id="placeInput" type="search" placeholder="Search a country, city, place, or road">
+            <div id="place-results"></div>
+        </form>
+        <div id="map-modes">
+            <button type="button" id="mode-earth" class="active">Satellite</button>
+            <button type="button" id="mode-roads">Street map</button>
+        </div>
+    </div>
+</div>
+
+<script>window.CESIUM_BASE_URL = "https://unpkg.com/cesium@1.125/Build/Cesium/";</script>
+<script src="https://unpkg.com/cesium@1.125/Build/Cesium/Cesium.js"></script>
+<script src="earth-view.js"></script>
+<script>
+    const roadsLayer = new Cesium.UrlTemplateImageryProvider({
+        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        maximumLevel: 19,
+        credit: "© OpenStreetMap contributors"
+    });
+
+    const viewer = new Cesium.Viewer("map", {
+        imageryProvider: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        animation: false,
+        timeline: false,
+        homeButton: false,
+        sceneModePicker: false,
+        navigationHelpButton: false,
+        fullscreenButton: false,
+        infoBox: true,
+        terrainProvider: new Cesium.EllipsoidTerrainProvider()
+    });
+    addRealWorldLayers(viewer);
+    viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(-0.89, 0.86, 20000000)
+    });
+
+    let allProperties = [];
+    let markers = {};
+    let placeMarker = null;
+
+    function useBasemap(mode) {
+        viewer.imageryLayers.removeAll();
+        if (mode === "roads") {
+            viewer.imageryLayers.addImageryProvider(roadsLayer);
+        } else {
+            addRealWorldLayers(viewer);
+        }
+        document.getElementById("mode-earth").classList.toggle("active", mode !== "roads");
+        document.getElementById("mode-roads").classList.toggle("active", mode === "roads");
+    }
+
+    document.getElementById("mode-earth").onclick = () => useBasemap("earth");
+    document.getElementById("mode-roads").onclick = () => useBasemap("roads");
+
+    function flyToPlace(lng, lat, height) {
+        if (height && height > 5000) {
+            viewer.camera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(lng, lat, height),
+                duration: 1.8
+            });
+            return;
+        }
+        lookAtGround(viewer, lng, lat, Math.max(height || 420, 280));
+    }
+
+    // Read URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+    const searchParam = urlParams.get('search');
+
+    if (typeParam) {
+        document.getElementById("listingTypeFilter").value = typeParam;
+    }
+    if (searchParam) {
+        document.getElementById("searchInput").value = searchParam;
+    }
+
+    function esc(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function clearMarkers() {
+        Object.values(markers).forEach(entity => viewer.entities.remove(entity));
+        markers = {};
+    }
+
+    function heightForPlace(kind) {
+        if (kind === "country") return 8000000;
+        if (kind === "state" || kind === "region") return 1500000;
+        if (kind === "city" || kind === "town") return 80000;
+        if (kind === "street" || kind === "road" || kind === "highway") return 2500;
+        return 20000;
+    }
+
+    function showPlace(feature) {
+        const [lng, lat] = feature.geometry.coordinates;
+        const props = feature.properties || {};
+        const kind = props.osm_value || props.type || "place";
+        if (placeMarker) viewer.entities.remove(placeMarker);
+        placeMarker = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lng, lat),
+            point: {
+                pixelSize: 12,
+                color: Cesium.Color.fromCssColorString("#1a1a2e"),
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            name: props.name || "Selected place",
+            description: esc(kind)
+        });
+        viewer.selectedEntity = placeMarker;
+        flyToPlace(lng, lat, heightForPlace(kind));
+        document.getElementById("place-results").innerHTML = "";
+        document.getElementById("placeInput").value = props.name || "";
+    }
+
+    function getListingBadge(type) {
+        if (type === 'SALE') return `<span class="badge sale">For Sale</span>`;
+        if (type === 'RENT') return `<span class="badge rent">For Rent</span>`;
+        if (type === 'HOTEL') return `<span class="badge hotel">Hotel</span>`;
+        return '';
+    }
+
+    function renderProperties(properties) {
+        const list = document.getElementById("property-list");
+        list.innerHTML = "";
+        clearMarkers();
+
+        if (properties.length === 0) {
+            list.innerHTML = "<p style='color:#6b7280; padding:20px; text-align:center;'>No properties found.</p>";
+            return;
+        }
+
+        properties.forEach(property => {
+            const card = document.createElement("div");
+            card.className = "property-card";
+
+            const verifiedBadge = property.titleVerified
+                ? `<span class="badge verified">Verified</span>`
+                : `<span class="badge not-verified">Not Verified</span>`;
+
+            const priceLabel = property.priceType === 'MONTHLY' ? '/month' :
+                property.priceType === 'NIGHTLY' ? '/night' : '';
+
+            const cover = property.images && property.images.length ? property.images[0].url : "";
+            const photo = cover
+                ? `<img class="card-photo" src="${esc(cover)}" alt="">`
+                : `<div class="card-photo placeholder">No photo yet</div>`;
+
+            card.innerHTML = `
+                    ${photo}
+                    <h3>${esc(property.title)}</h3>
+                    <div class="price">₦${Number(property.price).toLocaleString()}${priceLabel}</div>
+                    <div class="location">${esc(property.address || "")} ${property.city ? "• " + esc(property.city) : ""}</div>
+                    <div class="badges">
+                        ${getListingBadge(property.listingType)}
+                        ${verifiedBadge}
+                    </div>
+                    <a class="map-open" href="property-details.html?id=${property.id}">Open listing</a>
+                `;
+
+            card.onclick = () => {
+                if (property.latitude && property.longitude) {
+                    lookAtGround(viewer, property.longitude, property.latitude, 380);
+                    viewer.selectedEntity = markers[property.id];
+                }
+            };
+            card.querySelector(".map-open").onclick = (event) => event.stopPropagation();
+
+            list.appendChild(card);
+
+            if (property.latitude && property.longitude) {
+                const marker = viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(property.longitude, property.latitude),
+                    point: {
+                        pixelSize: 14,
+                        color: Cesium.Color.fromCssColorString("#c41e3a"),
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 2,
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                    },
+                    name: property.title,
+                    description: "₦" + Number(property.price).toLocaleString() + priceLabel
+                        + "<br>" + esc(property.address || "")
+                        + "<br><a href='property-details.html?id=" + property.id + "'>Open listing</a>"
+                });
+                markers[property.id] = marker;
+            }
+        });
+    }
+
+    function applyFilters() {
+        const search = document.getElementById("searchInput").value.toLowerCase();
+        const listingType = document.getElementById("listingTypeFilter").value;
+        const verified = document.getElementById("verifiedFilter").value;
+
+        const filtered = allProperties.filter(p => {
+            const matchesSearch =
+                (p.title && p.title.toLowerCase().includes(search)) ||
+                (p.address && p.address.toLowerCase().includes(search)) ||
+                (p.city && p.city.toLowerCase().includes(search));
+
+            const matchesType = listingType === "all" || p.listingType === listingType;
+            const matchesVerified =
+                verified === "all" ||
+                (verified === "verified" && p.titleVerified) ||
+                (verified === "not-verified" && !p.titleVerified);
+
+            return matchesSearch && matchesType && matchesVerified;
+        });
+
+        renderProperties(filtered);
+    }
+
+    fetch("http://localhost:8080/api/public/properties")
+        .then(res => res.json())
+        .then(data => {
+            allProperties = data;
+            applyFilters(); // apply URL filters if any
+        })
+        .catch(err => {
+            document.getElementById("property-list").innerHTML =
+                "<p style='color:red; padding:20px;'>Failed to load properties</p>";
+        });
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("listingTypeFilter").addEventListener("change", applyFilters);
+    document.getElementById("verifiedFilter").addEventListener("change", applyFilters);
+
+    const placeInput = document.getElementById("placeInput");
+    const placeResults = document.getElementById("place-results");
+    let placeTimer = null;
+
+    document.getElementById("place-search").addEventListener("submit", event => event.preventDefault());
+
+    placeInput.addEventListener("input", () => {
+        clearTimeout(placeTimer);
+        const query = placeInput.value.trim();
+        if (query.length < 2) {
+            placeResults.innerHTML = "";
+            return;
+        }
+        placeTimer = setTimeout(() => searchPlaces(query), 350);
+    });
+
+    async function searchPlaces(query) {
+        try {
+            const res = await fetch("https://photon.komoot.io/api/?limit=6&lat=9.08&lon=8.68&q=" + encodeURIComponent(query));
+            const data = await res.json();
+            const features = data.features || [];
+            if (!features.length) {
+                placeResults.innerHTML = "<button type='button'>No matching place or road</button>";
+                return;
+            }
+            placeResults.innerHTML = "";
+            features.forEach(feature => {
+                const props = feature.properties || {};
+                const where = [props.city, props.state, props.country].filter(Boolean).join(", ");
+                const button = document.createElement("button");
+                button.type = "button";
+                button.innerHTML = "<strong>" + esc(props.name || "Unnamed place") + "</strong><span>"
+                    + esc([props.osm_value, where].filter(Boolean).join(" · ")) + "</span>";
+                button.onclick = () => showPlace(feature);
+                placeResults.appendChild(button);
+            });
+        } catch (err) {
+            placeResults.innerHTML = "<button type='button'>Map search is unavailable right now</button>";
+        }
+    }
+</script>
+</body>
+</html>

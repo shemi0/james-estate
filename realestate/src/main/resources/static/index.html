@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>James Estate | Homes for sale, rent and stay</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Source Sans 3", "Segoe UI", sans-serif;
+            background: #fff;
+            color: #1b2430;
+            line-height: 1.45;
+        }
+        a { color: inherit; }
+        .topbar {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid #e6eaf0;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 30;
+        }
+        .brand { font-size: 26px; font-weight: 700; text-decoration: none; color: #0b63ce; letter-spacing: -0.03em; }
+        .menu { display: flex; gap: 26px; list-style: none; }
+        .menu a { text-decoration: none; font-weight: 600; color: #243140; }
+        .menu a:hover { color: #0b63ce; }
+        .actions { display: flex; gap: 10px; }
+        .ghost, .solid {
+            text-decoration: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .ghost { border: 1px solid #c9d3e0; color: #17304d; }
+        .solid { background: #0b63ce; color: #fff; }
+        .stage {
+            position: relative;
+            height: 620px;
+            background: #102033;
+            overflow: hidden;
+        }
+        .stack { position: absolute; inset: 0; }
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+        }
+        .slide.is-live { opacity: 1; z-index: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .shade {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(8, 18, 32, 0.15) 20%, rgba(8, 18, 32, 0.72) 100%);
+        }
+        .caption {
+            position: absolute;
+            left: 48px;
+            bottom: 148px;
+            color: #fff;
+            z-index: 2;
+            max-width: 640px;
+        }
+        .caption span {
+            display: inline-block;
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .caption h1 { font-size: 52px; line-height: 1.05; font-weight: 700; }
+        .caption p { margin-top: 8px; font-size: 18px; color: #e7eef8; }
+        .finder {
+            position: absolute;
+            left: 48px;
+            right: 48px;
+            bottom: 36px;
+            z-index: 3;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(8, 18, 32, 0.25);
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            align-items: center;
+        }
+        .finder input {
+            flex: 1;
+            border: none;
+            font: inherit;
+            font-size: 17px;
+            padding: 12px 14px;
+        }
+        .finder input:focus { outline: none; }
+        .finder button {
+            background: #0b63ce;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 26px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .dots {
+            position: absolute;
+            right: 48px;
+            bottom: 158px;
+            z-index: 3;
+            display: flex;
+            gap: 8px;
+        }
+        .dots button {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(255,255,255,0.45);
+            cursor: pointer;
+        }
+        .dots button.is-live { background: #fff; }
+        .meter {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            z-index: 4;
+        }
+        .meter i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: #fff;
+        }
+        .meter i.run { animation: fill 3s linear; }
+        @keyframes fill { from { width: 0; } to { width: 100%; } }
+        .band { padding: 28px 48px 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .band a {
+            text-decoration: none;
+            border: 1px solid #d7e0ea;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 700;
+            color: #17304d;
+            background: #f7f9fc;
+        }
+        .band a:hover { border-color: #0b63ce; color: #0b63ce; }
+        .wrap { padding: 28px 48px 56px; }
+        .wrap h2 { font-size: 32px; margin-bottom: 6px; }
+        .sub { color: #5d6b7c; margin-bottom: 22px; }
+        .market-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .listing-card { display: block; text-decoration: none; color: inherit; border: 1px solid #e4eaf1; border-radius: 14px; overflow: hidden; background: #fff; }
+        .listing-card:hover { box-shadow: 0 10px 24px rgba(16, 32, 51, 0.08); }
+        .listing-card img, .empty-photo { width: 100%; height: 200px; object-fit: cover; background: #eef2f6; display: flex; align-items: center; justify-content: center; color: #66788c; }
+        .listing-body { padding: 14px 16px 18px; }
+        .listing-body h3 { font-size: 20px; }
+        .listing-price { color: #0b63ce; font-weight: 700; margin-top: 4px; }
+        .listing-meta { color: #5d6b7c; font-size: 14px; }
+        .foot { border-top: 1px solid #e6eaf0; padding: 22px 48px; color: #5d6b7c; display: flex; justify-content: space-between; }
+        .foot a { color: #0b63ce; text-decoration: none; margin-right: 16px; }
+        @media (max-width: 800px) {
+            .topbar, .band, .wrap, .foot { padding-left: 16px; padding-right: 16px; }
+            .menu { display: none; }
+            .stage { height: 560px; }
+            .caption, .finder { left: 16px; right: 16px; }
+            .caption { bottom: 150px; }
+            .caption h1 { font-size: 34px; }
+            .dots { display: none; }
+            .market-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="index.html">James Estate</a>
+    <ul class="menu">
+        <li><a href="properties.html?type=SALE">Buy</a></li>
+        <li><a href="properties.html?type=RENT">Rent</a></li>
+        <li><a href="properties.html?type=HOTEL">Short stay</a></li>
+        <li><a href="properties.html">Map</a></li>
+    </ul>
+    <div class="actions">
+        <a class="ghost" href="login.html">Sign in</a>
+        <a class="solid" href="register.html">List a property</a>
+    </div>
+</header>
+
+<section class="stage" aria-label="Building previews">
+    <div class="stack" id="stack"></div>
+    <div class="caption">
+        <span id="slide-kicker">For sale</span>
+        <h1 id="slide-title">Find a home that is already on the market</h1>
+        <p id="slide-copy">Photos of buildings change every 3 seconds.</p>
+    </div>
+    <div class="dots" id="dots"></div>
+    <form class="finder" onsubmit="goToSearch(); return false;">
+        <input id="searchInput" type="search" placeholder="City, area, or property title">
+        <button type="submit">Search homes</button>
+    </form>
+    <div class="meter"><i id="meter" class="run"></i></div>
+</section>
+
+<nav class="band">
+    <a href="properties.html?type=SALE">Houses for sale</a>
+    <a href="properties.html?type=RENT">Apartments for rent</a>
+    <a href="properties.html?type=HOTEL">Short stays</a>
+    <a href="properties.html">Open the map</a>
+</nav>
+
+<main class="wrap">
+    <h2>Homes on James Estate</h2>
+    <p class="sub">Live listings from agents. Open one to see the price, photos, and map.</p>
+    <div id="market-grid" class="market-grid"></div>
+</main>
+
+<footer class="foot">
+    <div>
+        <a href="properties.html">Browse</a>
+        <a href="login.html">Agent sign in</a>
+        <a href="register.html">Advertise a building</a>
+    </div>
+    <p>James Estate</p>
+</footer>
+
+<script>
+    const slides = [
+        {
+            image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1800&q=80",
+            kicker: "For sale",
+            title: "Waterfront houses with room to breathe",
+            copy: "Detached homes, pools, and private grounds.",
+            href: "properties.html?type=SALE"
+        },
+        {
+            image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1800&q=80",
+            kicker: "For rent",
+            title: "Apartment towers in the city",
+            copy: "High floors, glass fronts, and a short walk to work.",
+            href: "properties.html?type=RENT"
+        },
+        {
+            image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80",
+            kicker: "Commercial",
+            title: "Towers built for business",
+            copy: "Offices and mixed-use buildings on main streets.",
+            href: "properties.html"
+        },
+        {
+            image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1800&q=80",
+            kicker: "Family homes",
+            title: "Houses on quiet streets",
+            copy: "Gardens, garages, and space for a household.",
+            href: "properties.html?type=SALE"
+        },
+        {
+            image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1800&q=80",
+            kicker: "Luxury",
+            title: "Villas finished for evening light",
+            copy: "Wide rooms, terraces, and a clear view.",
+            href: "properties.html?type=SALE"
+        },
+        {
+            image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1800&q=80",
+            kicker: "Short stay",
+            title: "Residences ready for a few nights",
+            copy: "Furnished homes for guests and short lets.",
+            href: "properties.html?type=HOTEL"
+        }
+    ];
+
+    const stack = document.getElementById("stack");
+    const dots = document.getElementById("dots");
+    const meter = document.getElementById("meter");
+    let index = 0;
+    let timer = null;
+
+    slides.forEach((slide, i) => {
+        const layer = document.createElement("a");
+        layer.className = "slide" + (i === 0 ? " is-live" : "");
+        layer.href = slide.href;
+        layer.innerHTML = `<img src="${slide.image}" alt="${slide.title}"><div class="shade"></div>`;
+        stack.appendChild(layer);
+
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = i === 0 ? "is-live" : "";
+        dot.setAttribute("aria-label", "Show building " + (i + 1));
+        dot.onclick = () => show(i);
+        dots.appendChild(dot);
+    });
+
+    function show(next) {
+        index = (next + slides.length) % slides.length;
+        document.querySelectorAll(".slide").forEach((el, i) => el.classList.toggle("is-live", i === index));
+        document.querySelectorAll(".dots button").forEach((el, i) => el.classList.toggle("is-live", i === index));
+        const slide = slides[index];
+        document.getElementById("slide-kicker").textContent = slide.kicker;
+        document.getElementById("slide-title").textContent = slide.title;
+        document.getElementById("slide-copy").textContent = slide.copy;
+        meter.classList.remove("run");
+        void meter.offsetWidth;
+        meter.classList.add("run");
+    }
+
+    function arm() {
+        clearInterval(timer);
+        timer = setInterval(() => show(index + 1), 3000);
+    }
+
+    show(0);
+    arm();
+
+    function goToSearch() {
+        const query = document.getElementById("searchInput").value.trim();
+        window.location.href = query
+            ? "properties.html?search=" + encodeURIComponent(query)
+            : "properties.html";
+    }
+
+    function esc(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function money(property) {
+        const label = property.priceType === "PER_NIGHT" ? " / night"
+            : property.priceType === "PER_MONTH" ? " / month" : "";
+        return "₦" + Number(property.price || 0).toLocaleString() + label;
+    }
+
+    async function loadMarket() {
+        const grid = document.getElementById("market-grid");
+        try {
+            const res = await fetch("http://localhost:8080/api/public/properties");
+            const properties = await res.json();
+            const picks = properties.slice(0, 6);
+            if (!picks.length) {
+                grid.innerHTML = "<p class='sub'>No agent listings yet. The building previews above keep playing.</p>";
+                return;
+            }
+            grid.innerHTML = picks.map(property => {
+                const photo = property.images && property.images.length
+                    ? `<img src="${esc(property.images[0].url)}" alt="">`
+                    : `<div class="empty-photo">Photograph coming</div>`;
+                const place = [property.city, property.state].filter(Boolean).join(", ");
+                return `<a class="listing-card" href="property-details.html?id=${property.id}">
+                    ${photo}
+                    <div class="listing-body">
+                        <h3>${esc(property.title)}</h3>
+                        <div class="listing-price">${money(property)}</div>
+                        <div class="listing-meta">${esc(place || property.address || "Nigeria")}</div>
+                    </div>
+                </a>`;
+            }).join("");
+        } catch (err) {
+            grid.innerHTML = "<p class='sub'>Listings appear here when the server is running.</p>";
+        }
+    }
+
+    loadMarket();
+</script>
+</body>
+</html>

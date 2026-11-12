@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Sign Up | James Estate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 30px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #c41e3a;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #1a1a1a;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 24px;
+        }
+
+        .register-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .register-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 460px;
+            padding: 40px;
+        }
+
+        .register-card h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #111;
+        }
+
+        .register-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 18px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            background: #c41e3a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .register-btn:hover {
+            background: #a01830;
+        }
+
+        .register-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .footer-text a {
+            color: #c41e3a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+<link rel="stylesheet" href="market.css">
+</head>
+<body class="market">
+
+<nav class="navbar">
+    <a href="index.html" class="logo">James <span>Estate</span></a>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+    </div>
+</nav>
+
+<div class="register-container">
+    <div class="register-card">
+        <h1>Create Agent Account</h1>
+        <p>Register to start listing properties on James Estate</p>
+
+        <label>Full Name</label>
+        <input type="text" id="fullName" placeholder="Enter your full name" required>
+
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="080xxxxxxxx" required>
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create a strong password" required>
+
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+
+        <button class="register-btn" id="registerBtn" onclick="register()">Create Account</button>
+
+        <div id="message" class="message"></div>
+
+        <div class="footer-text">
+            Already have an account? <a href="login.html">Log in</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function register() {
+        const btn = document.getElementById("registerBtn");
+        const messageDiv = document.getElementById("message");
+
+        const fullName = document.getElementById("fullName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Validation
+        if (!fullName || !email || !phone || !password || !confirmPassword) {
+            showMessage("All fields are required", "error");
+            return;
+        }
+
+        if (password.length < 6) {
+            showMessage("Password must be at least 6 characters", "error");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage("Passwords do not match", "error");
+            return;
+        }
+
+        // Disable button while processing
+        btn.disabled = true;
+        btn.innerText = "Creating Account...";
+
+        const userData = {
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            password: password
+        };
+
+        try {
+            const res = await fetch("http://localhost:8080/api/users/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem("pendingEmail", email);
+                const failed = data.emailSent === false ? "&mail=failed" : "";
+                window.location.href = "verify-otp.html?email=" + encodeURIComponent(email) + failed;
+            } else {
+                showMessage(data.message || "Registration failed", "error");
+                btn.disabled = false;
+                btn.innerText = "Create Account";
+            }
+        } catch (err) {
+            console.error(err);
+            showMessage("Server error. Is the backend running?", "error");
+            btn.disabled = false;
+            btn.innerText = "Create Account";
+        }
+    }
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.className = "message " + type;
+        messageDiv.style.display = "block";
+        messageDiv.innerText = text;
+    }
+
+    // Allow pressing Enter to submit
+    document.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            register();
+        }
+    });
+</script>
+</body>
+</html>
